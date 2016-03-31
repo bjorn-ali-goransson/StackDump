@@ -121,7 +121,26 @@ namespace StackDump
 
             foreach (var frame in thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null))
             {
-                Console.WriteLine($"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => (a.TypeName != "N/A" ? a.TypeName + " " : string.Empty) + a.Name))})");
+                string output;
+
+                output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => (a.TypeName != "N/A" ? a.TypeName + " " : string.Empty) + a.Name))})";
+
+                if (output.Length > 80)
+                {
+                    output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => (a.TypeName != "N/A" ? a.TypeName.Split('.').Last() + " " : string.Empty) + a.Name))})";
+                }
+
+                if (output.Length > 80)
+                {
+                    output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => a.Name))})";
+                }
+
+                if (output.Length > 80)
+                {
+                    output = output.Substring(0, 80 - 3) + "...";
+                }
+
+                Console.WriteLine(output);
             }
         }
     }
