@@ -164,6 +164,7 @@ namespace StackDump
                 if (namespaceBase != "System" && namespaceBase != lastNamespaceBase)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
+                    lastMethodName = null;
                 }
 
                 Console.Write($"  {namespaceBase}");
