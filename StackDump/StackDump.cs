@@ -25,11 +25,11 @@ namespace StackDump
 
                 if (applications.Count() > 1)
                 {
-                    Console.WriteLine($"{workerProcess.AppPool} (sites: {string.Join(", ", applications.Select(a => a.Name))})");
+                    Console.WriteLine($"[{workerProcess.AppPool}] (sites: {string.Join(", ", applications.Select(a => a.Name))})");
                 }
                 else
                 {
-                    Console.WriteLine(applications.Single().Name);
+                    Console.WriteLine($"[applications.Single().Name]");
                 }
 
                 var debugger = new MDbgEngine();
