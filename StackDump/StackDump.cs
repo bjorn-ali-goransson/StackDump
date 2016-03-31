@@ -121,7 +121,7 @@ namespace StackDump
 
             foreach (var frame in thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null))
             {
-                if(frame.Function.FullName == "System.Threading.Tasks.Task.Execute")
+                if (frame.Function.FullName == "System.Threading.Tasks.Task.Execute")
                 {
                     return;
                 }
@@ -153,8 +153,15 @@ namespace StackDump
 
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write(methodNameParts.First());
-                Console.ForegroundColor = color;
-                Console.Write(string.Join(".", methodNameParts.Skip(1).Take(methodNameParts.Count() - 2)));
+                Console.Write('.');
+
+                if (methodNameParts.Count() > 2)
+                {
+                    Console.ForegroundColor = color;
+                    Console.Write(string.Join(".", methodNameParts.Skip(1).Take(methodNameParts.Count() - 2)));
+                    Console.Write('.');
+                }
+
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write(methodNameParts.Last());
                 Console.ForegroundColor = color;
