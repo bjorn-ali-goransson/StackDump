@@ -110,29 +110,16 @@ namespace StackDump
             string lastNamespaceBase = null;
             string lastMethodName = null;
 
-            foreach (var frame in thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null))
+            var frames = thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null).ToList();
+
+            while (frames.First().Function.FullName.StartsWith("System."))
+            {
+                frames.RemoveAt(0);
+            }
+
+            foreach (var frame in frames)
             {
                 if (frame.Function.FullName.Contains("+<>") || frame.Function.FullName.Contains(".<"))
-                {
-                    continue;
-                }
-
-                if (frame.Function.FullName.StartsWith("System.Net.Sockets"))
-                {
-                    continue;
-                }
-
-                if (frame.Function.FullName.StartsWith("System.Net.Connection.SyncRead"))
-                {
-                    continue;
-                }
-
-                if (frame.Function.FullName.StartsWith("System.Net.ConnectStream.ProcessWriteCallDone"))
-                {
-                    continue;
-                }
-
-                if (frame.Function.FullName.StartsWith("System.Net.HttpWebRequest.CheckDeferredCallDone"))
                 {
                     continue;
                 }
