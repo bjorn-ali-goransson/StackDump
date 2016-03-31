@@ -99,7 +99,7 @@ namespace StackDump
 
             var frames = thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null).ToList();
 
-            while (frames.First().Function.FullName.StartsWith("System."))
+            while (frames.First().Function.FullName.StartsWith("System.") || frames.First().Function.FullName.StartsWith("Microsoft."))
             {
                 frames.RemoveAt(0);
             }
