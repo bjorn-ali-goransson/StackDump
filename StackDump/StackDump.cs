@@ -16,8 +16,8 @@ namespace StackDump
         {
             Console.WriteLine();
 
-            var allApplications = GetIisApplications();
-            var workerProcesses = GetIisWorkerProcesses();
+            var allApplications = IisApplication.CreateFrom(GetAppCmdList("list app"));
+            var workerProcesses = IisWorkerProcess.CreateFrom(GetAppCmdList("list wps"));
 
             foreach(var workerProcess in workerProcesses)
             {
@@ -53,16 +53,6 @@ namespace StackDump
                     }
                 }
             }
-        }
-
-        private static IEnumerable<IisWorkerProcess> GetIisWorkerProcesses()
-        {
-            return IisWorkerProcess.CreateFrom(GetAppCmdList("list wps"));
-        }
-
-        private static IEnumerable<IisApplication> GetIisApplications()
-        {
-            return IisApplication.CreateFrom(GetAppCmdList("list app"));
         }
 
         private static IEnumerable<string> GetAppCmdList(string command)
