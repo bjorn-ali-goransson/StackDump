@@ -149,8 +149,14 @@ namespace StackDump
 
                 var color = Console.ForegroundColor;
 
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.Write(outputParts[0]);
+                var methodNameParts = outputParts[0].Split('.');
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write(methodNameParts.First());
+                Console.ForegroundColor = color;
+                Console.Write(string.Join(".", methodNameParts.Skip(1).Take(methodNameParts.Count() - 2)));
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write(methodNameParts.Last());
                 Console.ForegroundColor = color;
 
                 if (outputParts.Length > 1)
@@ -158,8 +164,6 @@ namespace StackDump
                     Console.Write('(');
                     Console.Write(outputParts[1]);
                 }
-
-                Console.WriteLine();
             }
         }
     }
