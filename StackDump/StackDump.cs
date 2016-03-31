@@ -119,6 +119,8 @@ namespace StackDump
             Console.WriteLine();
             WriteBlue("Thread:");
 
+            string lastNamespaceBase = null;
+
             foreach (var frame in thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null))
             {
                 if (frame.Function.FullName == "System.Threading.Tasks.Task.Execute")
@@ -167,27 +169,32 @@ namespace StackDump
 
                 var methodNameParts = outputParts[0].Split('.');
 
-                if (methodNameParts.First() != "  System")
+                var namespaceBase = methodNameParts.First().Trim();
+                var namespaceRest = methodNameParts.Count() > 2 ? string.Join(".", methodNameParts.Skip(1).Take(methodNameParts.Count() - 2)) : null;
+                var methodName = methodNameParts.Last();
+
+                if (namespaceBase != "System" && namespaceBase != lastNamespaceBase)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                 }
 
-                Console.Write(methodNameParts.First());
+                Console.Write($"  {namespaceBase}");
+                lastNamespaceBase = namespaceBase;
+
                 Console.ForegroundColor = color;
                 Console.Write('.');
 
-                if (methodNameParts.Count() > 2)
+                if (namespaceRest != null)
                 {
-                    Console.Write(string.Join(".", methodNameParts.Skip(1).Take(methodNameParts.Count() - 2)));
+                    Console.Write(namespaceRest);
                     Console.Write('.');
                 }
 
-
-                if (methodNameParts.First() != "  System")
+                if (namespaceBase != "System")
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
-                Console.Write(methodNameParts.Last());
+                Console.Write(methodName);
                 Console.ForegroundColor = color;
 
                 if (outputParts.Length > 1)
