@@ -120,6 +120,7 @@ namespace StackDump
             WriteBlue("Thread:");
 
             string lastNamespaceBase = null;
+            string lastMethodName = null;
 
             foreach (var frame in thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null))
             {
@@ -190,11 +191,12 @@ namespace StackDump
                     Console.Write('.');
                 }
 
-                if (namespaceBase != "System")
+                if (namespaceBase != "System" && !methodName.StartsWith("<") && methodName != lastMethodName)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
                 Console.Write(methodName);
+                lastMethodName = methodName;
                 Console.ForegroundColor = color;
 
                 if (outputParts.Length > 1)
