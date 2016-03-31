@@ -134,12 +134,7 @@ namespace StackDump
 
                 string output;
 
-                output = $"  {frame.Function.FullName}({string.Join(", ", arguments.Select(a => (a.TypeName != "N/A" ? a.TypeName + " " : string.Empty) + a.Name))})";
-
-                if (output.Length > 79)
-                {
-                    output = $"  {frame.Function.FullName}({string.Join(", ", arguments.Select(a => (a.TypeName != "N/A" ? a.TypeName.Split('.').Last() + " " : string.Empty) + a.Name))})";
-                }
+                output =  $"  {frame.Function.FullName}({string.Join(", ", arguments.Select(a => (a.TypeName != "N/A" ? a.TypeName.Split('.').Last() + " " : string.Empty) + a.Name))})";
 
                 if (output.Length > 79)
                 {
