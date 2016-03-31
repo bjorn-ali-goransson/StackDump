@@ -29,7 +29,7 @@ namespace StackDump
                 }
                 else
                 {
-                    Console.WriteLine($"[applications.Single().Name]");
+                    Console.WriteLine($"[{applications.Single().Name}]");
                 }
 
                 var debugger = new MDbgEngine();
