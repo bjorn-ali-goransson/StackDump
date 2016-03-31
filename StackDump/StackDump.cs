@@ -155,6 +155,7 @@ namespace StackDump
 
                 if (outputParts.Length > 1)
                 {
+                    Console.Write('(');
                     Console.Write(outputParts[1]);
                 }
 
