@@ -124,6 +124,11 @@ namespace StackDump
 
             foreach (var frame in thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null))
             {
+                if (frame.Function.FullName.StartsWith("System.Net.Sockets"))
+                {
+                    continue;
+                }
+
                 if (frame.Function.FullName == "System.Threading.Tasks.Task.Execute")
                 {
                     return;
