@@ -131,18 +131,29 @@ namespace StackDump
                     return;
                 }
 
+                MDbgValue[] arguments;
+
+                try
+                {
+                    arguments = frame.Function.GetArguments(frame);
+                }
+                catch
+                {
+                    return;
+                }
+
                 string output;
 
-                output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => (a.TypeName != "N/A" ? a.TypeName + " " : string.Empty) + a.Name))})";
+                output = $"  {frame.Function.FullName}({string.Join(", ", arguments.Select(a => (a.TypeName != "N/A" ? a.TypeName + " " : string.Empty) + a.Name))})";
 
                 if (output.Length > 79)
                 {
-                    output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => (a.TypeName != "N/A" ? a.TypeName.Split('.').Last() + " " : string.Empty) + a.Name))})";
+                    output = $"  {frame.Function.FullName}({string.Join(", ", arguments.Select(a => (a.TypeName != "N/A" ? a.TypeName.Split('.').Last() + " " : string.Empty) + a.Name))})";
                 }
 
                 if (output.Length > 79)
                 {
-                    output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => a.Name))})";
+                    output = $"  {frame.Function.FullName}({string.Join(", ", arguments.Select(a => a.Name))})";
                 }
 
                 if (output.Length > 79)
