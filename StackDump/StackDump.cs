@@ -21,14 +21,19 @@ namespace StackDump
             {
                 var applications = allApplications.Where(a => a.AppPool == workerProcess.AppPool);
 
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 if (applications.Count() > 1)
                 {
-                    WriteYellow($"{workerProcess.AppPool} (sites: {string.Join(", ", applications.Select(a => a.Name))})");
+                    Console.WriteLine($"{workerProcess.AppPool} (sites: {string.Join(", ", applications.Select(a => a.Name))})");
                 }
                 else
                 {
-                    WriteYellow(applications.Single().Name);
+                    Console.WriteLine(applications.Single().Name);
                 }
+                Console.ForegroundColor = color;
+
+                Console.WriteLine();
 
                 var debugger = new MDbgEngine();
 
@@ -51,14 +56,6 @@ namespace StackDump
                     }
                 }
             }
-        }
-
-        private static void WriteYellow(string value)
-        {
-            var color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(value);
-            Console.ForegroundColor = color;
         }
 
         private static IEnumerable<IisWorkerProcess> GetIisWorkerProcesses()
