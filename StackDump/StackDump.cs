@@ -108,10 +108,6 @@ namespace StackDump
         
         private static void DumpThread(MDbgThread thread)
         {
-            Console.WriteLine();
-            Console.WriteLine("Thread:");
-            Console.WriteLine();
-
             string lastNamespaceBase = null;
             string lastMethodName = null;
 
