@@ -156,7 +156,11 @@ namespace StackDump
 
                 var methodNameParts = outputParts[0].Split('.');
 
-                Console.ForegroundColor = ConsoleColor.Yellow;
+                if (methodNameParts.First() != "System")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+
                 Console.Write(methodNameParts.First());
                 Console.Write('.');
 
