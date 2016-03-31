@@ -171,7 +171,11 @@ namespace StackDump
                     Console.Write('.');
                 }
 
-                Console.ForegroundColor = ConsoleColor.Green;
+
+                if (methodNameParts.First() != "  System")
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
                 Console.Write(methodNameParts.Last());
                 Console.ForegroundColor = color;
 
