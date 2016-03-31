@@ -164,6 +164,8 @@ namespace StackDump
                     Console.Write('(');
                     Console.Write(outputParts[1]);
                 }
+
+                Console.WriteLine();
             }
         }
     }
