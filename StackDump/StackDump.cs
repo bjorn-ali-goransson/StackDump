@@ -33,8 +33,6 @@ namespace StackDump
                 }
                 Console.ForegroundColor = color;
 
-                Console.WriteLine();
-
                 var debugger = new MDbgEngine();
 
                 using (var proc = new DebugProcess(debugger.Attach(workerProcess.Id, MdbgVersionPolicy.GetDefaultAttachVersion(workerProcess.Id))))
