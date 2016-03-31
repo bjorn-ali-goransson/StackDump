@@ -167,6 +167,11 @@ namespace StackDump
                 var namespaceRest = methodNameParts.Count() > 2 ? string.Join(".", methodNameParts.Skip(1).Take(methodNameParts.Count() - 2)) : null;
                 var methodName = methodNameParts.Last();
 
+                if (methodName.StartsWith("<"))
+                {
+                    continue;
+                }
+
                 if (namespaceBase != "System" && namespaceBase != lastNamespaceBase)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -184,7 +189,7 @@ namespace StackDump
                     Console.Write('.');
                 }
 
-                if (namespaceBase != "System" && !methodName.StartsWith("<") && methodName != lastMethodName)
+                if (namespaceBase != "System" && methodName != lastMethodName)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
