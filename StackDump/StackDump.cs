@@ -145,7 +145,20 @@ namespace StackDump
                     output = output.Substring(0, 80 - 5) + " ...";
                 }
 
-                Console.WriteLine(output);
+                var outputParts = output.Split(new char[] { '(' }, 2);
+
+                var color = Console.ForegroundColor;
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write(outputParts[0]);
+                Console.ForegroundColor = color;
+
+                if (outputParts.Length > 1)
+                {
+                    Console.Write(outputParts[1]);
+                }
+
+                Console.WriteLine();
             }
         }
     }
