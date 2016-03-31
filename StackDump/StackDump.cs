@@ -104,21 +104,16 @@ namespace StackDump
                 frames.RemoveAt(0);
             }
 
+            while (frames.Last().Function.FullName.StartsWith("System."))
+            {
+                frames.RemoveAt(frames.Count() - 1);
+            }
+
             foreach (var frame in frames)
             {
                 if (frame.Function.FullName.Contains("+<>") || frame.Function.FullName.Contains(".<"))
                 {
                     continue;
-                }
-
-                if (frame.Function.FullName == "System.Threading.Tasks.Task.Execute")
-                {
-                    return;
-                }
-
-                if (frame.Function.FullName == "System.Web.UI.Page.ProcessRequest")
-                {
-                    return;
                 }
 
                 MDbgValue[] arguments;
