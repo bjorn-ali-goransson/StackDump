@@ -135,19 +135,19 @@ namespace StackDump
 
                 output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => (a.TypeName != "N/A" ? a.TypeName + " " : string.Empty) + a.Name))})";
 
-                if (output.Length > 80)
+                if (output.Length > 79)
                 {
                     output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => (a.TypeName != "N/A" ? a.TypeName.Split('.').Last() + " " : string.Empty) + a.Name))})";
                 }
 
-                if (output.Length > 80)
+                if (output.Length > 79)
                 {
                     output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => a.Name))})";
                 }
 
-                if (output.Length > 80)
+                if (output.Length > 79)
                 {
-                    output = output.Substring(0, 80 - 5) + " ...";
+                    output = output.Substring(0, 79 - 4) + " ...";
                 }
 
                 var outputParts = output.Split(new char[] { '(' }, 2);
