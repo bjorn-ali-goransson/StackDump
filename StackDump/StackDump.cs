@@ -117,6 +117,21 @@ namespace StackDump
                     continue;
                 }
 
+                if (frame.Function.FullName.StartsWith("System.Net.Connection.SyncRead"))
+                {
+                    continue;
+                }
+
+                if (frame.Function.FullName.StartsWith("System.Net.ConnectStream.ProcessWriteCallDone"))
+                {
+                    continue;
+                }
+
+                if (frame.Function.FullName.StartsWith("System.Net.HttpWebRequest.CheckDeferredCallDone"))
+                {
+                    continue;
+                }
+
                 if (frame.Function.FullName == "System.Threading.Tasks.Task.Execute")
                 {
                     return;
