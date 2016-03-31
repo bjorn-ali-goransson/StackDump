@@ -16,17 +16,18 @@ namespace StackDump.Extensions
 
         public static bool IsActive(this MDbgThread thread)
         {
-            if (thread.IsIdle())
-            {
-                return false;
-            }
-
             var frames = thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null).ToList();
 
             if (!frames.Any())
             {
                 return false;
             }
+
+            if (thread.IsIdle())
+            {
+                return false;
+            }
+
 
             while (frames.First().Function.FullName.StartsWith("System.") || frames.First().Function.FullName.StartsWith("Microsoft.") || frames.First().Function.FullName.StartsWith("SNINativeMethodWrapper."))
             {
