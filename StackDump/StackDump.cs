@@ -14,6 +14,8 @@ namespace StackDump
     {
         private static void Main(string[] args)
         {
+            Console.WriteLine();
+
             var allApplications = GetIisApplications();
             var workerProcesses = GetIisWorkerProcesses();
 
