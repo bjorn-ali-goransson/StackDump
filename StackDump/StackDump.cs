@@ -23,8 +23,6 @@ namespace StackDump
             {
                 var applications = allApplications.Where(a => a.AppPool == workerProcess.AppPool);
 
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Yellow;
                 if (applications.Count() > 1)
                 {
                     Console.WriteLine($"{workerProcess.AppPool} (sites: {string.Join(", ", applications.Select(a => a.Name))})");
@@ -33,7 +31,6 @@ namespace StackDump
                 {
                     Console.WriteLine(applications.Single().Name);
                 }
-                Console.ForegroundColor = color;
 
                 var debugger = new MDbgEngine();
 
