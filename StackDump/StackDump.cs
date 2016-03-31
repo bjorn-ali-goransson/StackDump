@@ -142,7 +142,7 @@ namespace StackDump
 
                 if (output.Length > 80)
                 {
-                    output = output.Substring(0, 80 - 3) + "...";
+                    output = output.Substring(0, 80 - 5) + " ...";
                 }
 
                 Console.WriteLine(output);
