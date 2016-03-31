@@ -16,22 +16,29 @@ namespace StackDump.Extensions
 
         public static bool IsActive(this MDbgThread thread)
         {
-            if (!thread.Frames.Any())
-            {
-                return false;
-            }
-
             if (thread.IsIdle())
             {
                 return false;
             }
 
-            if (!thread.Frames.Any(f => !f.IsInfoOnly && f.Function != null))
+            var frames = thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null).ToList();
+
+            if (!frames.Any())
             {
                 return false;
             }
 
-            return true;
+            while (frames.First().Function.FullName.StartsWith("System.") || frames.First().Function.FullName.StartsWith("Microsoft.") || frames.First().Function.FullName.StartsWith("SNINativeMethodWrapper."))
+            {
+                frames.RemoveAt(0);
+            }
+
+            while (frames.Last().Function.FullName.StartsWith("System."))
+            {
+                frames.RemoveAt(frames.Count() - 1);
+            }
+
+            return frames.Any();
         }
     }
 }
