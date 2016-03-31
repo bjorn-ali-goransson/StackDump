@@ -126,6 +126,11 @@ namespace StackDump
                     return;
                 }
 
+                if (frame.Function.FullName == "System.Web.UI.Page.ProcessRequest")
+                {
+                    return;
+                }
+
                 string output;
 
                 output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => (a.TypeName != "N/A" ? a.TypeName + " " : string.Empty) + a.Name))})";
