@@ -38,7 +38,7 @@ namespace StackDump
                 {
                     InitializeMdbg(debugger, proc.Process);
 
-                    var activeThreads = proc.Process.Threads.Cast<MDbgThread>().Where(t => t.IsActive());
+                    var activeThreads = proc.Process.Threads.Cast<MDbgThread>().Where(t => t.GetFrames().Any());
 
                     if (!activeThreads.Any())
                     {
@@ -97,19 +97,7 @@ namespace StackDump
             string lastNamespaceBase = null;
             string lastMethodName = null;
 
-            var frames = thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null).ToList();
-
-            while (frames.First().Function.FullName.StartsWith("System.") || frames.First().Function.FullName.StartsWith("Microsoft.") || frames.First().Function.FullName.StartsWith("SNINativeMethodWrapper."))
-            {
-                frames.RemoveAt(0);
-            }
-
-            while (frames.Last().Function.FullName.StartsWith("System."))
-            {
-                frames.RemoveAt(frames.Count() - 1);
-            }
-
-            foreach (var frame in frames)
+            foreach (var frame in thread.GetFrames())
             {
                 if (frame.Function.FullName.Contains("+<>") || frame.Function.FullName.Contains(".<"))
                 {
