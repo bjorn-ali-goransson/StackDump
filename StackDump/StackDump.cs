@@ -121,6 +121,11 @@ namespace StackDump
 
             foreach (var frame in thread.Frames.Where(f => !f.IsInfoOnly && f.Function != null))
             {
+                if(frame.Function.FullName == "System.Threading.Tasks.Task.Execute")
+                {
+                    return;
+                }
+
                 string output;
 
                 output = $"  {frame.Function.FullName}({string.Join(", ", frame.Function.GetArguments(frame).Select(a => (a.TypeName != "N/A" ? a.TypeName + " " : string.Empty) + a.Name))})";
