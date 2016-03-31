@@ -61,14 +61,6 @@ namespace StackDump
             Console.ForegroundColor = color;
         }
 
-        private static void WriteBlue(string value)
-        {
-            var color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine(value);
-            Console.ForegroundColor = color;
-        }
-
         private static IEnumerable<IisWorkerProcess> GetIisWorkerProcesses()
         {
             return IisWorkerProcess.CreateFrom(GetAppCmdList("list wps"));
@@ -117,7 +109,8 @@ namespace StackDump
         private static void DumpThread(MDbgThread thread)
         {
             Console.WriteLine();
-            WriteBlue("Thread:");
+            Console.WriteLine("Thread:");
+            Console.WriteLine();
 
             string lastNamespaceBase = null;
             string lastMethodName = null;
