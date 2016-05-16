@@ -55,7 +55,8 @@ namespace StackDump
 
                 try
                 {
-                    using (var proc = new DebugProcess(debugger.Attach(process.Id, MdbgVersionPolicy.GetDefaultAttachVersion(process.Id))))
+                    var netVersion = MdbgVersionPolicy.GetDefaultAttachVersion(process.Id); // like "4.0.30319.42000" ... read more: https://msdn.microsoft.com/en-us/library/ms230176(v=vs.110).aspx
+                    using (var proc = new DebugProcess(debugger.Attach(process.Id, netVersion)))
                     {
                         InitializeMdbg(debugger, proc.Process);
 
