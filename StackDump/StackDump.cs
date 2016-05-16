@@ -7,50 +7,75 @@ using System.Text.RegularExpressions;
 using System.Linq;
 using StackDump.Entities;
 using StackDump.Extensions;
+using System.Security.Principal;
+using System.Management;
 
 namespace StackDump
 {
-    public class StackDump
+    public static class StackDump
     {
-        private static void Main(string[] args)
+        public static Regex siteNamePattern = new Regex("/site:\"(?<sitename>[^\"]+)\"", RegexOptions.Compiled);
+
+        public static void Main(string[] args)
         {
             Console.WriteLine();
 
-            var allApplications = IisApplication.CreateFrom(GetAppCmdList("list app"));
-            var workerProcesses = IisWorkerProcess.CreateFrom(GetAppCmdList("list wps"));
+            var isAdmin = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
 
-            foreach(var workerProcess in workerProcesses)
+            List<IisApplication> applications = null;
+            List<IisWorkerProcess> workerProcesses = null;
+
+            if (isAdmin)
             {
-                var applications = allApplications.Where(a => a.AppPool == workerProcess.AppPool);
+                applications = IisApplication.CreateFrom(GetAppCmdList("list app"));
+                workerProcesses = IisWorkerProcess.CreateFrom(GetAppCmdList("list wps"));
+            }
+            else
+            {
+                var iisExpressSiteNames = new ManagementObjectSearcher("select CommandLine, ProcessId from Win32_Process where Name='iisexpress.exe'").Get().Cast<ManagementBaseObject>().ToDictionary(o => int.Parse(o["ProcessId"].ToString()), o => siteNamePattern.Match(o["CommandLine"].ToString()).Groups["sitename"].Value);
+                
+                workerProcesses = Process.GetProcesses().Where(p => p.ProcessName == "iisexpress").Select(p => new IisWorkerProcess { AppPool = $"IIS Express ({p.Id})", Id = p.Id }).ToList();
+                applications = workerProcesses.Select(w => new IisApplication { AppPool = w.AppPool, Name = iisExpressSiteNames[w.Id] }).ToList();
+            }
 
-                if (applications.Count() > 1)
+            var processes = applications.GroupBy(a => workerProcesses.Single(p => p.AppPool == a.AppPool), (w, a) => new { Id = w.Id, AppPool = w.AppPool, Applications = a.Select(app => app.Name) });
+            
+            foreach(var process in processes)
+            {
+                if (process.Applications.Count() > 1)
                 {
-                    Console.WriteLine($"[{workerProcess.AppPool}] (sites: {string.Join(", ", applications.Select(a => a.Name))})");
+                    Console.WriteLine($"[{process.AppPool}] (sites: {string.Join(", ", process.Applications)})");
                 }
                 else
                 {
-                    Console.WriteLine($"[{applications.Single().Name}]");
+                    Console.WriteLine($"[{process.Applications.Single()}]");
                 }
 
                 var debugger = new MDbgEngine();
 
-                using (var proc = new DebugProcess(debugger.Attach(workerProcess.Id, MdbgVersionPolicy.GetDefaultAttachVersion(workerProcess.Id))))
+                try
                 {
-                    InitializeMdbg(debugger, proc.Process);
-
-                    var activeThreads = proc.Process.Threads.Cast<MDbgThread>().Where(t => t.GetFrames().Any());
-
-                    if (!activeThreads.Any())
+                    using (var proc = new DebugProcess(debugger.Attach(process.Id, MdbgVersionPolicy.GetDefaultAttachVersion(process.Id))))
                     {
-                        Console.WriteLine("  (no active .NET threads)");
+                        InitializeMdbg(debugger, proc.Process);
 
-                        continue;
-                    }
+                        var activeThreads = proc.Process.Threads.Cast<MDbgThread>().Where(t => t.GetFrames().Any());
 
-                    foreach (var thread in activeThreads)
-                    {
-                        DumpThread(thread);
+                        if (!activeThreads.Any())
+                        {
+                            Console.WriteLine("  (no active .NET threads)");
+
+                            continue;
+                        }
+
+                        foreach (var thread in activeThreads)
+                        {
+                            DumpThread(thread);
+                        }
                     }
+                }
+                catch (Exception e){
+                    Console.WriteLine(e.Message);
                 }
             }
         }
@@ -104,36 +129,9 @@ namespace StackDump
                     continue;
                 }
 
-                MDbgValue[] arguments;
-
-                try
-                {
-                    arguments = frame.Function.GetArguments(frame);
-                }
-                catch
-                {
-                    return;
-                }
-
-                string output;
-
-                output =  $"  {frame.Function.FullName}({string.Join(", ", arguments.Select(a => (a.TypeName != "N/A" ? a.TypeName.Split('.').Last() + " " : string.Empty) + a.Name))})";
-
-                if (output.Length > 79)
-                {
-                    output = $"  {frame.Function.FullName}({string.Join(", ", arguments.Select(a => a.Name))})";
-                }
-
-                if (output.Length > 79)
-                {
-                    output = output.Substring(0, 79 - 4) + " ...";
-                }
-
-                var outputParts = output.Split(new char[] { '(' }, 2);
-
                 var color = Console.ForegroundColor;
 
-                var methodNameParts = outputParts[0].Split('.');
+                var methodNameParts = frame.Function.FullName.Split('.');
 
                 var namespaceBase = methodNameParts.First().Trim();
                 var namespaceRest = methodNameParts.Count() > 2 ? string.Join(".", methodNameParts.Skip(1).Take(methodNameParts.Count() - 2)) : null;
@@ -170,10 +168,42 @@ namespace StackDump
                 lastMethodName = methodName;
                 Console.ForegroundColor = color;
 
-                if (outputParts.Length > 1)
+                List<MDbgValue> arguments;
+
+                try
                 {
-                    Console.Write('(');
-                    Console.Write(outputParts[1]);
+                    arguments = frame.Function.GetArguments(frame).ToList();
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if(arguments.First().Name == "this")
+                {
+                    arguments.RemoveAt(0);
+                }
+
+                string argumentsString = string.Join(", ", arguments.Select(a => (a.TypeName == "N/A" ? string.Empty : a.TypeName.Split('.').Last() + " ") + a.Name));
+
+                if(arguments.Any(a => a.TypeName == "N/A") || $"  {methodName}({argumentsString})".Length > 79)
+                {
+                    argumentsString = string.Join(", ", arguments.Select(a => a.Name));
+                }
+
+                if ($"  {methodName}({argumentsString})".Length > 79)
+                {
+                    while($"  {methodName}({argumentsString} ...".Length > 79)
+                    argumentsString = argumentsString.Substring(0, argumentsString.Length - 1);
+                }
+
+                Console.Write('(');
+
+                Console.Write(argumentsString);
+
+                if (!argumentsString.EndsWith(" ..."))
+                {
+                    Console.Write(')');
                 }
 
                 Console.WriteLine();
