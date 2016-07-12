@@ -32,8 +32,15 @@ namespace StackDump
             }
             else
             {
-                var iisExpressSiteNames = new ManagementObjectSearcher("select CommandLine, ProcessId from Win32_Process where Name='iisexpress.exe'").Get().Cast<ManagementBaseObject>().ToDictionary(o => int.Parse(o["ProcessId"].ToString()), o => siteNamePattern.Match(o["CommandLine"].ToString()).Groups["sitename"].Value);
+                var iisExpressSiteNames = new ManagementObjectSearcher("select * from Win32_Process where Name='iisexpress.exe'").Get().Cast<ManagementBaseObject>().ToDictionary(o => int.Parse(o["ProcessId"].ToString()), o => o["CommandLine"] == null ? null : siteNamePattern.Match(o["CommandLine"].ToString()).Groups["sitename"].Value);
                 
+                if(iisExpressSiteNames.ContainsValue(null))
+                {
+                    Console.WriteLine($"Warning: Some sites (PID {string.Join(", ", iisExpressSiteNames.Where(p => p.Value == null))}) seem to be running as Administrator and cannot be inspected");
+
+                    iisExpressSiteNames = iisExpressSiteNames.Where(p => p.Value != null).ToDictionary(p => p.Key, p => p.Value);
+                }
+
                 workerProcesses = Process.GetProcesses().Where(p => p.ProcessName == "iisexpress").Select(p => new IisWorkerProcess { AppPool = $"IIS Express ({p.Id})", Id = p.Id }).ToList();
                 applications = workerProcesses.Select(w => new IisApplication { AppPool = w.AppPool, Name = iisExpressSiteNames[w.Id] }).ToList();
             }
