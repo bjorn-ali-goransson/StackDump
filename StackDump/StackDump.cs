@@ -27,8 +27,8 @@ namespace StackDump
 
             if (isAdmin)
             {
-                applications = IisApplication.CreateFrom(GetAppCmdList("list app"));
                 workerProcesses = IisWorkerProcess.CreateFrom(GetAppCmdList("list wps"));
+                applications = IisApplication.CreateFrom(GetAppCmdList("list app")).Where(a => workerProcesses.Any(w => w.AppPool == a.AppPool)).ToList();
             }
             else
             {
