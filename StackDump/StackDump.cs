@@ -18,6 +18,10 @@ namespace StackDump
 
         public static void Main(string[] args)
         {
+            if (args.Length == 0)
+            {
+                Console.WriteLine("To list site names, do --list. To list a specific site, just supply the site name after the command.");
+            }
             Console.WriteLine();
 
             var isAdmin = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
@@ -46,8 +50,37 @@ namespace StackDump
             }
 
             var processes = applications.GroupBy(a => workerProcesses.Single(p => p.AppPool == a.AppPool), (w, a) => new { Id = w.Id, AppPool = w.AppPool, Applications = a.Select(app => app.Name) });
-            
-            foreach(var process in processes)
+
+
+
+            if (args.Any())
+            {
+                if (args[0] == "--list")
+                {
+                    foreach (var process in processes)
+                    {
+                        foreach (var application in process.Applications)
+                        {
+                            Console.WriteLine(application);
+                        }
+                    }
+
+                    return;
+                }
+                else
+                {
+                    var matchName = string.Join(" ", args);
+                    processes = processes.Where(p => p.Applications.Contains(matchName));
+
+                    if (!processes.Any())
+                    {
+                        Console.WriteLine($"No sites named {matchName}. Spaces are supported - no quotation marks. Run --list.");
+                        return;
+                    }
+                }
+            }
+
+            foreach (var process in processes)
             {
                 if (process.Applications.Count() > 1)
                 {

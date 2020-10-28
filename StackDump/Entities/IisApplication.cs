@@ -16,7 +16,7 @@ namespace StackDump.Entities
 
         public static List<IisApplication> CreateFrom(IEnumerable<string> appCmdOutput)
         {
-            return appCmdOutput.Select(CreateFrom).ToList();
+            return appCmdOutput.Select(CreateFrom).Where(a => a != null).ToList();
         }
 
         public static IisApplication CreateFrom(string appCmdOutputLine)
